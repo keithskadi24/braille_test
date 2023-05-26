@@ -21,7 +21,7 @@ def main():
         # Preprocess the uploaded image
         image = Image.open(uploaded_file)
         image = image.convert('L')  # Convert to grayscale
-        image = image.resize(image, (28, 28))  # Resize to model input size
+        image = image.resize((28, 28))  # Resize to model input size
         img_array = np.array(image) / 255.0  # Normalize pixel values
         img_array = img_array[..., np.newaxis]  # Add channel dimension
 
