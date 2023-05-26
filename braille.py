@@ -1,69 +1,48 @@
 import streamlit as st
+import tensorflow as tf
 import numpy as np
-from tensorflow import keras
-from PIL import Image
+from PIL import Image, ImageOps
 
-# Load the saved Keras model
-#@st.cache_resource
-def load_model():
-  model = keras.models.load_model('Final_Model.h5')
-  return model
-model=load_model()
+@st.cache(allow_output_mutation=True)
+def load_model_from_file():
+    model = tf.keras.models.load_model('path_to_your_trained_model.h5')  # Replace 'path_to_your_trained_model.h5' with the actual path to your trained model file
+    return model
 
-# Calculate the covariance matrix of the flattened data
-cov_matrix = np.cov(X_train_scaled, rowvar=False)
+model = load_model_from_file()
 
-# Perform SVD on the covariance matrix
-U, S, V = np.linalg.svd(cov_matrix)
+classes = {0: 'a', 1: 'b', 2: 'c', ...}  # Replace the class indices with the corresponding braille characters
 
-# Calculate the square root of the diagonal matrix obtained from SVD
-epsilon = 1e-5
-whiten_matrix = np.dot(U, np.dot(np.diag(1.0 / np.sqrt(S + epsilon)), U.T))
+st.write("""
+# Braille Character Recognition
+""")
+st.write("#### Deployed by Your Name")
 
-# Function to preprocess the image
-def preprocess_image(image):
-    # Resize the image to (28, 28) and convert to grayscale
-    image = image.resize((28, 28)).convert('L')
-    # Normalize the image
-    image = np.array(image) / 255.0
-    # Add channel dimension
-    image = image[np.newaxis, ..., np.newaxis]
-    # Apply the whitening transformation
-    image = np.dot(image.reshape(-1, 28*28), whiten_matrix).reshape(28, 28, 1)
-    return image
+file = st.file_uploader("Choose a photo from your computer", type=["jpg", "png"])
 
-# Function to make predictions
-def predict(image):
-    # Preprocess the image
-    preprocessed_image = preprocess_image(image)
-    # Make predictions
-    predictions = model.predict(preprocessed_image)
-    # Get the predicted label
-    predicted_label = chr(np.argmax(predictions) + 97)
-    return predicted_label
+def import_and_predict(image_data, model):
+    size = (28, 28)  # Adjust the size to match your trained model input shape
+    image = ImageOps.fit(image_data, size, Image.ANTIALIAS)
+    img = np.asarray(image)
+    img_gray = img.mean(axis=2)  # Convert the image to grayscale
+    img_resized = cv2.resize(img_gray, size)  # Resize the image
+    img_normalized = img_resized / 255.0  # Normalize the image
+    img_reshaped = img_normalized[np.newaxis, ..., np.newaxis]  # Add batch and channel dimensions
+    prediction = model.predict(img_reshaped)
+    predicted_class = np.argmax(prediction)
+    return predicted_class
 
-# Streamlit app
-def main():
-    # Set the title and description of the app
-    st.title("Braille Character Recognition")
-    st.write("Upload an image of a braille character to predict its label.")
-
-    # File uploader for image
-    uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
-
-    # Perform prediction if an image is uploaded
-    if uploaded_file is not None:
-        # Read the image file
-        image = Image.open(uploaded_file)
-        # Display the uploaded image
-        st.image(image, caption="Uploaded Image", use_column_width=True)
-
-        # Perform prediction on the image
-        predicted_label = predict(image)
-        
-        # Display the predicted label
-        st.write("Predicted Label:", predicted_label)
-
-# Run the app
-if __name__ == "__main__":
-    main()
+if file is None:
+    st.text("Please upload an image file")
+else:
+    try:
+        image = Image.open(file) if file else None
+        if image:
+            st.image(image, use_column_width=True)
+            prediction = import_and_predict(image, model)
+            predicted_character = classes[prediction]
+            st.success(f"Predicted Braille Character: {predicted_character}")
+        else:
+            st.text("The file is invalid. Upload a valid image file.")
+    except Exception as e:
+        st.text("An error occurred while processing the image.")
+        st.text(str(e))
