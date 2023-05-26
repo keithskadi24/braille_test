@@ -10,6 +10,16 @@ def load_model():
   return model
 model=load_model()
 
+# Calculate the covariance matrix of the flattened data
+cov_matrix = np.cov(X_train_scaled, rowvar=False)
+
+# Perform SVD on the covariance matrix
+U, S, V = np.linalg.svd(cov_matrix)
+
+# Calculate the square root of the diagonal matrix obtained from SVD
+epsilon = 1e-5
+whiten_matrix = np.dot(U, np.dot(np.diag(1.0 / np.sqrt(S + epsilon)), U.T))
+
 # Function to preprocess the image
 def preprocess_image(image):
     # Resize the image to (28, 28) and convert to grayscale
