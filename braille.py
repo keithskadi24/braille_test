@@ -21,15 +21,6 @@ def preprocess_image(image):
     return image
 
 # Function to make predictions
-def predict(image):
-    # Preprocess the image
-    preprocessed_image = preprocess_image(image)
-    # Make predictions
-    predictions = model.predict(preprocessed_image)
-    # Get the predicted label
-    predicted_label = chr(np.argmax(predictions) + 97)
-    return predicted_label
-  
  def predict(image):
     # Preprocess the image
     preprocessed_image = preprocess_image(image)
