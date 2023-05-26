@@ -10,28 +10,48 @@ def load_model():
   return model
 model=load_model()
 
+# Function to preprocess the image
+def preprocess_image(image):
+    # Resize the image to (28, 28) and convert to grayscale
+    image = image.resize((28, 28)).convert('L')
+    # Normalize the image
+    image = np.array(image) / 255.0
+    # Add channel dimension
+    image = image[np.newaxis, ..., np.newaxis]
+    return image
+
+# Function to make predictions
+def predict(image):
+    # Preprocess the image
+    preprocessed_image = preprocess_image(image)
+    # Make predictions
+    predictions = model.predict(preprocessed_image)
+    # Get the predicted label
+    predicted_label = chr(np.argmax(predictions) + 97)
+    return predicted_label
+
+# Streamlit app
 def main():
+    # Set the title and description of the app
     st.title("Braille Character Recognition")
-    st.write("Upload an image for prediction.")
+    st.write("Upload an image of a braille character to predict its label.")
 
-    # Create a file uploader
-    uploaded_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
+    # File uploader for image
+    uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
 
+    # Perform prediction if an image is uploaded
     if uploaded_file is not None:
-        # Preprocess the uploaded image
+        # Read the image file
         image = Image.open(uploaded_file)
-        image = image.convert('L')  # Convert to grayscale
-        image = image.resize((28, 28))  # Resize to model input size
-        img_array = np.array(image) / 255.0  # Normalize pixel values
-        img_array = img_array[..., np.newaxis]  # Add channel dimension
+        # Display the uploaded image
+        st.image(image, caption="Uploaded Image", use_column_width=True)
 
-        # Make prediction
-        prediction = model.predict(np.array([img_array]))
-        predicted_class = np.argmax(prediction)
-        predicted_label = chr(prediction.argmax() + 65)
+        # Perform prediction on the image
+        predicted_label = predict(image)
+        
+        # Display the predicted label
+        st.write("Predicted Label:", predicted_label)
 
-        # Display the uploaded image and prediction
-        st.image(image, caption=f"Predicted Label: {predicted_label}", use_column_width=True)
-
+# Run the app
 if __name__ == "__main__":
     main()
