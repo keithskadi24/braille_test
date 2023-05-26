@@ -5,7 +5,10 @@ from PIL import Image
 
 # Load the saved Keras model
 @st.cache_resource
-model = keras.models.load_model('Final_Model.h5')
+def load_model():
+  model = keras.models.load_model('Final_Model.h5')
+  return model
+model=load_model()
 
 def main():
     st.title("Braille Character Recognition")
