@@ -21,7 +21,7 @@ def preprocess_image(image):
     return image
 
 # Function to make predictions
- def predict(image):
+def predict(image):
     # Preprocess the image
     preprocessed_image = preprocess_image(image)
     # Make predictions
