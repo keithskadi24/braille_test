@@ -28,7 +28,7 @@ def main():
         # Make prediction
         prediction = model.predict(np.array([img_array]))
         predicted_class = np.argmax(prediction)
-        predicted_label = chr(predicted_class + 97)
+        predicted_label = chr(prediction.argmax() + 65)
 
         # Display the uploaded image and prediction
         st.image(image, caption=f"Predicted Label: {predicted_label}", use_column_width=True)
