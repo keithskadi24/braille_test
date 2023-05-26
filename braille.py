@@ -4,7 +4,7 @@ from tensorflow import keras
 from PIL import Image
 
 # Load the saved Keras model
-@st.cache_resource
+#@st.cache_resource
 def load_model():
   model = keras.models.load_model('Final_Model.h5')
   return model
@@ -22,6 +22,15 @@ def preprocess_image(image):
 
 # Function to make predictions
 def predict(image):
+    # Preprocess the image
+    preprocessed_image = preprocess_image(image)
+    # Make predictions
+    predictions = model.predict(preprocessed_image)
+    # Get the predicted label
+    predicted_label = chr(np.argmax(predictions) + 97)
+    return predicted_label
+  
+ def predict(image):
     # Preprocess the image
     preprocessed_image = preprocess_image(image)
     # Make predictions
