@@ -5,7 +5,7 @@ from PIL import Image, ImageOps
 
 @st.cache(allow_output_mutation=True)
 def load_model_from_file():
-    model = tf.keras.models.load_model('Braille_Model-2.h5')  # Replace 'path_to_your_trained_model.h5' with the actual path to your trained model file
+    model = tf.keras.models.load_model('path_to_your_trained_model.h5')  # Replace 'path_to_your_trained_model.h5' with the actual path to your trained model file
     return model
 
 model = load_model_from_file()
