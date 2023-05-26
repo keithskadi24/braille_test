@@ -4,38 +4,31 @@ from tensorflow import keras
 from PIL import Image
 
 # Load the saved Keras model
+@st.cache_resource
 model = keras.models.load_model('Final_Model.h5')
 
-# Function to make predictions
-def make_prediction(image):
-    # Preprocess the image
-    image = image.resize((224, 224))  # Resize the image to the input shape expected by the model
-    image = np.array(image)  # Convert image to numpy array
-    image = image / 255.0  # Normalize the image pixel values
-    image = np.expand_dims(image, axis=0)  # Add batch dimension
-
-    # Make predictions using the loaded model
-    prediction = model.predict(image)
-    predicted_class = np.argmax(prediction)  # Get the index of the predicted class
-    return predicted_class
-
-# Streamlit app code
 def main():
-    st.title("Image Classifier")
-    st.write("Upload an image and get the predicted class.")
+    st.title("Braille Character Recognition")
+    st.write("Upload an image for prediction.")
 
-    # File upload
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    # Create a file uploader
+    uploaded_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Display the uploaded image
+        # Preprocess the uploaded image
         image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        image = image.convert('L')  # Convert to grayscale
+        image = image.resize((28, 28))  # Resize to model input size
+        img_array = np.array(image) / 255.0  # Normalize pixel values
+        img_array = img_array[..., np.newaxis]  # Add channel dimension
 
-        # Make prediction on the uploaded image
-        if st.button("Classify"):
-            prediction = make_prediction(image)
-            st.write(f"Prediction: {prediction}")
+        # Make prediction
+        prediction = model.predict(np.array([img_array]))
+        predicted_class = np.argmax(prediction)
+        predicted_label = chr(predicted_class + 97)
 
-if __name__ == '__main__':
+        # Display the uploaded image and prediction
+        st.image(image, caption=f"Predicted Label: {predicted_label}", use_column_width=True)
+
+if __name__ == "__main__":
     main()
