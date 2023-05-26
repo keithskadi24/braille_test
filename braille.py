@@ -18,6 +18,8 @@ def preprocess_image(image):
     image = np.array(image) / 255.0
     # Add channel dimension
     image = image[np.newaxis, ..., np.newaxis]
+    # Apply the whitening transformation
+    image = np.dot(image.reshape(-1, 28*28), whiten_matrix).reshape(28, 28, 1)
     return image
 
 # Function to make predictions
